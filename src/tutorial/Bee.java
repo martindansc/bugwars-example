@@ -1,4 +1,4 @@
-package tutorial;
+package tutorialB;
 
 import bugwars.UnitController;
 
@@ -9,10 +9,6 @@ public class Bee extends MyUnit {
     }
 
     public void play() {
-
-    }
-
-    public void countMe() {
-        counters.increaseValueByOne(UNIT_INDEX_COUNTER_BEE);
+        //nothing yet!
     }
 }

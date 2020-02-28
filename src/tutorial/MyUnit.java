@@ -1,82 +1,54 @@
-package tutorial;
+package tutorialB;
 
 import bugwars.*;
 
-// this class have the functions that can be called from unit classes
+//Custom generic unit class. It contains all methods and attributes used by (mostly) all units.
 public abstract class MyUnit {
 
-    int UNIT_INDEX_COUNTER_BEETLE = 0;
-    int UNIT_INDEX_COUNTER_ANT = 4;
-    int UNIT_INDEX_COUNTER_BEE = 8;
-    int UNIT_INDEX_COUNTER_SPIDER = 12;
-    int FOOD_START_INDEX = 16;
+    //Beginning of the shared array slots used to store food locations.
+    final int FOOD_START_INDEX = 20;
 
+    //Beginning of the shared array slots used to store the total number of units of this type.
+    final int COUNTER_INDEX;
+
+    //Since locations can range from (0,0) to (1000,1000), we communicate the position of other objects relative to a common reference location.
+    final Location referenceLocation;
+
+    //Each unit should have an instance of each of these
     UnitController uc;
     Pathfinding pathfinding;
     FoodTracker foodTracker;
     Counter counters;
-
-    Location referenceLocation;
+    Micro micro;
 
     MyUnit(UnitController unitController) {
         uc = unitController;
+        COUNTER_INDEX = Helper.getCounterIndex(uc.getType());
 
-        // always make sure the reference location is the same for all the units
+        // this makes sure that the reference location is common to all units
         referenceLocation = uc.getTeam().getInitialLocations()[0];
 
         pathfinding = new Pathfinding(uc);
         foodTracker = new FoodTracker(uc, FOOD_START_INDEX, referenceLocation);
         counters = new Counter(uc);
+        micro = new Micro(uc);
     }
 
-    /* here we can declare the functions that all the units must have, but the behaviour
-       for each unit should be different.
-       For example, countMe function should add +1 to the unit type,
-       Ants must add one to Ant's counter, Bees to Bee's counter, etc. If we look at Ant class we will see
-       that exists a function called countMe() that adds one to the Ant's counter.
-       The function is called from UnitPlayer, so it must be declared that all the units have this function.
+    /*
+    Play is an abstract method, which means that each unit should implement its own play(). This allows different types of units to
+    have different behaviors.
      */
 
     abstract void play();
-    abstract void countMe();
 
 
-    /* Functions that can be used for all the units, that means that you can call this function from Ant, Bee, Beetle,
-       and any class that extends this class (MyUnit). This is useful to reuse common code for all the units.
+    /*
+    Methods that can be used by all units. This is useful to avoid having duplicate code.
      */
 
-    public void doMicro() {
-        Location myLocation = uc.getLocation();
-        Direction[] directions = Direction.values();
-
-        // initialize the micros
-        MicroInfo[] microInfos = new MicroInfo[directions.length];
-        for(int i = 0; i < directions.length; i++) {
-            Location newLocation = myLocation.add(directions[i]);
-            microInfos[i] = new MicroInfo(newLocation, uc);
-        }
-
-        // update micros for each enemy
-        UnitInfo[] enemies = uc.senseUnits(uc.getOpponent());
-        for(UnitInfo enemy: enemies) {
-            for(int i = 0; i < directions.length; i++) {
-                microInfos[i].update(enemy);
-            }
-        }
-
-        // choose best micro
-        MicroInfo bestMicro = microInfos[Helper.directionToInt(Direction.ZERO)];
-        for(MicroInfo micro: microInfos) {
-            if(uc.canMove(myLocation.directionTo(micro.loc)) && micro.imBetterThan(bestMicro)) {
-                bestMicro = micro;
-            }
-        }
-
-        // move
-        Direction bestMoveDirection = myLocation.directionTo(bestMicro.loc);
-        if(uc.canMove(bestMoveDirection)) {
-            uc.move(bestMoveDirection);
-        }
+    //Method that updates the counter of the given unit type.
+    void countMe(){
+        counters.increaseValueByOne(COUNTER_INDEX);
     }
 
     public void reportFood() {
@@ -87,34 +59,5 @@ public abstract class MyUnit {
                 foodTracker.saveFoodSeen(foodInfo.getLocation());
             }
         }
-    }
-
-    public boolean tryGenericAttack() {
-        UnitInfo[] enemies = uc.senseUnits(uc.getOpponent());
-        UnitInfo bestUnitToAttack;
-
-        if(enemies.length > 0) {
-            bestUnitToAttack = getGenericBestUnitToAttack(enemies);
-            if(bestUnitToAttack != null) {
-                uc.attack(bestUnitToAttack);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public UnitInfo getGenericBestUnitToAttack(UnitInfo[] units) {
-
-        UnitInfo unitToAttack = null;
-        // we will get the minimum health unit that we can attack
-        // there is a lot to improve here, go on and try :)
-        for (UnitInfo unit: units) {
-            if((unitToAttack == null || unitToAttack.getHealth() > unit.getHealth()) &&
-                    uc.canAttack(unit)) {
-                unitToAttack = unit;
-            }
-        }
-
-        return unitToAttack;
     }
 }

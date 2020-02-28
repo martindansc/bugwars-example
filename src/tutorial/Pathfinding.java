@@ -1,7 +1,12 @@
-package tutorial;
+package tutorialB;
 
-import bugwars.*;
+import bugwars.Direction;
+import bugwars.Location;
+import bugwars.UnitController;
 
+/*
+    BugNav pathfinding (copied from Discord!), there's a lot to improve here! :)
+ */
 public class Pathfinding {
     UnitController uc;
 

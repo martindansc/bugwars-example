@@ -1,6 +1,7 @@
-package tutorial;
+package tutorialB;
 
-import bugwars.*;
+import bugwars.Location;
+import bugwars.UnitController;
 
 public class Beetle extends MyUnit {
 
@@ -9,16 +10,16 @@ public class Beetle extends MyUnit {
     }
 
     public void play() {
-        boolean attackedThisTurn = tryGenericAttack();
+        boolean attackedThisTurn = micro.tryGenericAttack();
         move(attackedThisTurn);
-        tryGenericAttack();
+        micro.tryGenericAttack();
     }
 
     public void move(boolean attackedThisTurn) {
-        // decide macro target, we are going for the first enemy queen
+        // aim for the first enemy queen
         Location targetLocation = uc.getQueensLocation(uc.getOpponent())[0];
 
-        // now we move, different moves if we attacked or we haven't
+        // now we move, how we do so depends in if we attacked or we haven't
         if(!attackedThisTurn) {
             // we don't see enemies or we see them but we can't attack them so
             // we continue to our path
@@ -26,11 +27,7 @@ public class Beetle extends MyUnit {
             pathfinding.moveTo(targetLocation);
         }
         else {
-            doMicro();
+            micro.doMicro();
         }
-    }
-
-    public void countMe() {
-        counters.increaseValueByOne(UNIT_INDEX_COUNTER_BEETLE);
     }
 }

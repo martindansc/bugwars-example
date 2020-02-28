@@ -1,6 +1,8 @@
-package tutorial;
+package tutorialB;
 
-import bugwars.*;
+import bugwars.Direction;
+import bugwars.Location;
+import bugwars.UnitController;
 
 /*
 This class will track the food that we have seen during the game. It basically consists in
@@ -21,34 +23,33 @@ FOOD_MAP_LAST_ROUND_CLAIMED_16383 FOOD_MAP_ID_CLAIMED_16383, ]
 
 public class FoodTracker {
     // max map length
-    int MAX_MAP_LENGTH = 127;
+    final int MAX_MAP_LENGTH = 127;
 
-    // we will implement a "queue" that stores all the food seen, the maximum number of
-    // food we will track is 64
-    int MAX_QUEUE_ELEMENTS = 64;
+    // we implement a "queue" that stores all the food seen, the maximum number of
+    // food we track is 64
+    final int MAX_QUEUE_ELEMENTS = 64;
 
-    // index where the food map will start, we will store a map with all the locations
-    // and if the location has food or it doesn't
-    int FOOD_START_MEMORY_INDEX; // takes MAX_MAP_LENGTH * MAX_MAP_LENGTH * 2 * 2 space
+    // index where the food map starts, we store a map with all the locations, indicating
+    // if the location has food or if it doesn't
+    final int FOOD_START_MEMORY_INDEX; // takes MAX_MAP_LENGTH * MAX_MAP_LENGTH * 2 * 2 space
 
     // index where the food queue starts
-    int QUEUE_START_INDEX; // takes MAX_QUEUE_ELEMENTS space
+    final int QUEUE_START_INDEX; // takes MAX_QUEUE_ELEMENTS space
 
     // index where we store the number of total food seen, every time we see new food
-    // (we will be able to check if it's new or not thanks to the food map) we add one
+    // (we are able to check if it is new or not thanks to the food map) we add one
     // to the value
-    int FOOD_SEEN_INDEX;
+    final int FOOD_SEEN_INDEX;
 
-    // index that stores the current last value of the queue, each time we push a seen food
-    // we add one to this value module, goes from 0 to MAX_QUEUE_ELEMENTS - 1
-    int QUEUE_COUNTER_INDEX;
+    // index that stores the end of the queue (i.e. its last value), each time we push a seen food
+    // we add one to this value, it goes from 0 to MAX_QUEUE_ELEMENTS - 1
+    final int QUEUE_COUNTER_INDEX;
 
     Location referenceLocation;
 
     UnitController uc;
     FoodTracker(UnitController unitController, int foodStartMemoryIndex, Location rl){
-        // initialize the indexs, you can see how we reserve memory depending on the space
-        // each index needs
+        // initialize each index, we must be careful to leave enough space between them to avoid conflicts!
         FOOD_SEEN_INDEX = foodStartMemoryIndex;
         FOOD_START_MEMORY_INDEX = FOOD_SEEN_INDEX + 1;
         QUEUE_COUNTER_INDEX = FOOD_START_MEMORY_INDEX + MAX_MAP_LENGTH * 2 + 1;
@@ -58,7 +59,7 @@ public class FoodTracker {
         referenceLocation = rl;
     }
 
-    // function that given a location returns the index where we stored the food of the food map
+    // method that given a location returns the index where we stored the food on the food map
     public int getFoodIndex(int intLocation) {
         return FOOD_START_MEMORY_INDEX + intLocation * 2 + 1;
     }

@@ -1,12 +1,18 @@
-package tutorial;
+package tutorialB;
 
-import bugwars.*;
+import bugwars.Direction;
+import bugwars.UnitController;
+import bugwars.UnitInfo;
+import bugwars.UnitType;
 
 public class Queen extends MyUnit {
+
+    Direction[] allDirections = Direction.values();
 
     Queen(UnitController unitController){
         super(unitController);
     }
+
 
     public void play() {
         move();
@@ -18,21 +24,14 @@ public class Queen extends MyUnit {
         UnitInfo[] enemies = uc.senseUnits(uc.getOpponent());
 
         if(enemies.length == 0) {
-            /* if there are no enemies close we move into a random direction.
-                consider that this strategy is normally a bad one, since what we
-                want is to explore the map as much as possible, protect the unit, etc.
-                cleverer things can be done...  */
+            /* We move randomly if there are no enemies (this can be improved a lot).*/
             moveRandom();
         }
         else {
             /* We are a high value non combat unit and we are in danger!
-                we will try to escape from them! */
-            doMicro();
+               Our micro code guarantees that we try to escape from them! */
+            micro.doMicro();
         }
-    }
-
-    public void countMe() {
-        // it's empty on propose since we don't want to count queens
     }
 
     void moveRandom() {
@@ -44,13 +43,13 @@ public class Queen extends MyUnit {
 
     void trySpawn() {
         UnitInfo[] enemies = uc.senseUnits(uc.getOpponent());
-        Direction[] allDirections = Direction.values();
 
         // let's try to get new allies :)
         // first decide what unit type we need
         UnitType spawnType = null;
-        int numAnts = counters.read(UNIT_INDEX_COUNTER_ANT);
+        int numAnts = counters.read(Helper.getCounterIndex(UnitType.ANT));
         int numSeenCookies = foodTracker.getSeenCookies();
+        //We spawn an ant only if there are less than 20, we see no enemies and there are unclaimed cookies available to mine
         if(enemies.length == 0 && numSeenCookies > 0 &&
                 (numAnts == 0 || numSeenCookies/numAnts >= 3) && numAnts < 20) {
             spawnType = UnitType.ANT;
@@ -73,21 +72,7 @@ public class Queen extends MyUnit {
     void countCocoonUnits() {
         UnitInfo[] units = uc.senseUnits(uc.getTeam());
         for (UnitInfo unit: units) {
-            if(unit.isCocoon()) {
-                UnitType unitType = unit.getType();
-                if(unitType == UnitType.BEETLE) {
-                    counters.increaseValueByOne(UNIT_INDEX_COUNTER_BEETLE);
-                }
-                else if(unitType == UnitType.ANT) {
-                    counters.increaseValueByOne(UNIT_INDEX_COUNTER_ANT);
-                }
-                else if(unitType == UnitType.SPIDER) {
-                    counters.increaseValueByOne(UNIT_INDEX_COUNTER_SPIDER);
-                }
-                else if(unitType == UnitType.BEE) {
-                    counters.increaseValueByOne(UNIT_INDEX_COUNTER_BEE);
-                }
-            }
+            if(unit.isCocoon()) counters.increaseValueByOne(Helper.getCounterIndex(unit.getType()));
         }
     }
 }

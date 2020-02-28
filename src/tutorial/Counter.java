@@ -1,4 +1,4 @@
-package tutorial;
+package tutorialB;
 
 
 import bugwars.UnitController;
@@ -29,7 +29,7 @@ import bugwars.UnitController;
 public class Counter {
 
     UnitController uc;
-    public int COUNTERS_SPACE = 4;
+    public final int COUNTERS_SPACE = 4;
 
     Counter(UnitController unitController) {
         uc = unitController;

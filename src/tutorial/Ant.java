@@ -1,20 +1,30 @@
-package tutorial;
+package tutorialB;
 
-import bugwars.*;
+import bugwars.FoodInfo;
+import bugwars.Location;
+import bugwars.UnitController;
+import bugwars.UnitInfo;
 
 public class Ant extends MyUnit {
 
     Location[] myFood= {null, null, null};
+    int firstUnassignedIndex = 0;
 
     Ant(UnitController unitController){
         super(unitController);
     }
+
     public void play() {
+        //We want to claim at most 3 adjacent food tiles for ourselves and keep mining them
         assignFood();
+
+        //We broadcast that those food tiles are ours to avoid having other ants mining from them as well
+        claimFood();
+
         tryCollectFood();
         move();
         tryCollectFood();
-        tryGenericAttack();
+        micro.tryGenericAttack();
     }
 
     public void tryCollectFood() {
@@ -23,13 +33,11 @@ public class Ant extends MyUnit {
 
         FoodInfo[] foodsInfo = uc.senseFood();
         for(FoodInfo currentFoodInfo: foodsInfo) {
-            // first we skip some foodsInfo...
-            if(currentFoodInfo.getFood() > 3) {
-                // then we compare which one is better
-                if (isBetterFoodAThanB(currentFoodInfo, bestFood)) {
-                    bestFood = currentFoodInfo;
-                }
-            }
+            // ignore locations with less than 3 food
+            if (currentFoodInfo.getFood() < 3) continue;
+
+            // we keep track of the best food location with our custom comparison method
+            if (isBetterFoodAThanB(currentFoodInfo, bestFood)) bestFood = currentFoodInfo;
         }
 
         if(bestFood != null && uc.canMine(bestFood)) {
@@ -62,31 +70,22 @@ public class Ant extends MyUnit {
     }
 
     public void assignFood() {
-        // check if we have any food already assigned, if not, get our food
-        if(myFood[0] == null) {
-            myFood[0] = foodTracker.getNearestUnclaimedDiscoveredFood(uc.getLocation());
-            if(myFood[0] != null) foodTracker.claimMine(myFood[0]);
+        if (firstUnassignedIndex >= myFood.length) return;
+
+        //if we discover any available food, we claim it and try again!
+        myFood[firstUnassignedIndex] = foodTracker.getNearestUnclaimedDiscoveredFood(uc.getLocation());
+        if (myFood[firstUnassignedIndex] != null){
+            foodTracker.claimMine(myFood[firstUnassignedIndex++]);
+            assignFood();
         }
+    }
 
-        if(myFood[0] != null) {
-            if(myFood[1] == null) {
-                myFood[1] = foodTracker.getAdjacentUnclaimedDiscoveredFood(myFood[0]);
-                if(myFood[1] != null) foodTracker.claimMine(myFood[1]);
-            }
-
-            if(myFood[2] == null) {
-                myFood[2] = foodTracker.getAdjacentUnclaimedDiscoveredFood(myFood[0]);
-                if(myFood[2] != null) foodTracker.claimMine(myFood[2]);
-            }
-        }
-
-        // claim our assigned food
+    public void claimFood(){
         for (Location foodLocation: myFood) {
             if (foodLocation != null) {
                 foodTracker.claimMine(foodLocation);
             }
         }
-
     }
 
     public void move() {
@@ -97,12 +96,8 @@ public class Ant extends MyUnit {
             pathfinding.moveTo(myFood[0]);
         }
         else {
-            doMicro();
+            micro.doMicro();
         }
-    }
-
-    public void countMe() {
-        counters.increaseValueByOne(UNIT_INDEX_COUNTER_ANT);
     }
 
 }

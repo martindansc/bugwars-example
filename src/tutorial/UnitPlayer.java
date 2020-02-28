@@ -1,41 +1,31 @@
-package tutorial;
+package tutorialB;
 
-import bugwars.*;
+import bugwars.UnitController;
+import bugwars.UnitType;
 
 public class UnitPlayer {
 
     public void run(UnitController uc) {
 
-        // declare that we are a unit
+        // custom generic unit
         MyUnit me;
 
-        // instantiate the class according to our unit type
+        // instantiate the generic class according to our unit type
         UnitType myType = uc.getType();
-        if(myType == UnitType.ANT) {
-            me = new Ant(uc);
-        }
-        else if(myType == UnitType.QUEEN) {
-            me = new Queen(uc);
-        }
-        else if(myType == UnitType.BEETLE) {
-            me = new Beetle(uc);
-        }
-        else if(myType == UnitType.BEE) {
-            me = new Bee(uc);
-        }
-        else {
-            me = new Spider(uc);
-        }
+        if(myType == UnitType.ANT) me = new Ant(uc);
+        else if(myType == UnitType.QUEEN) me = new Queen(uc);
+        else if(myType == UnitType.BEETLE) me = new Beetle(uc);
+        else if(myType == UnitType.BEE) me = new Bee(uc);
+        else me = new Spider(uc);
 
         while(true){
-            // MyUnit class should define all the below functions
-            // if it's not implemented,
-            // you have to declare it as abstract
+            /*
+                Every unit should run each of these methods every turn (note that some of these are abstract (i.e. play()),
+                which means that they have to be implemented for each different instance of MyUnit).
+             */
             me.countMe();
             me.play();
             me.reportFood();
-
-            //if(uc.getRound() >500) return;
 
             uc.yield(); //End of turn
         }
