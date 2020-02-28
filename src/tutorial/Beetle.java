@@ -1,4 +1,4 @@
-package tutorialB;
+package tutorial;
 
 import bugwars.Location;
 import bugwars.UnitController;
